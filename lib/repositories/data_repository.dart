@@ -89,11 +89,22 @@ class DataRepository with ChangeNotifier {
     }
   }
 
+  Future<Movie> getMovieDetails({required Movie movie}) async {
+    try {
+      return await apiService.getMovieDetails(movie: movie);
+    } on Response catch (response) {
+      print("ERROR: ${response.statusCode}");
+      rethrow;
+    }
+  }
+
   Future<void> initData() async {
-    await getPopularMovies();
-    await getNowPlaying();
-    await getUpcomingMovies();
-    await getAnimationMovies();
-    await getSFMovies();
+    await Future.wait([
+      getPopularMovies(),
+      getNowPlaying(),
+      getUpcomingMovies(),
+      getAnimationMovies(),
+      getSFMovies(),
+    ]);
   }
 }

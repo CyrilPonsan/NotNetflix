@@ -110,4 +110,22 @@ class APIService {
       throw response;
     }
   }
+
+  Future<Movie> getMovieDetails({required Movie movie}) async {
+    Response response = await getData('/movie/${movie.id}');
+    if (response.statusCode == 200) {
+      Map<String, dynamic> data = response.data;
+      var genres = data['genres'] as List;
+      List<String> genreList = genres.map((item) {
+        return item['name'] as String;
+      }).toList();
+      Movie newMovie = movie.copyWith(
+          genres: genreList,
+          releaseDate: data['release_date'],
+          vote: data['vote_average']);
+      return newMovie;
+    } else {
+      throw (response);
+    }
+  }
 }
