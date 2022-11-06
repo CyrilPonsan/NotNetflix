@@ -12,7 +12,7 @@ class MovieCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (context) {
-          return MovieDtailsPage(movie: movie);
+          return MovieDetailsPage(movie: movie);
         }));
       },
       child: CachedNetworkImage(

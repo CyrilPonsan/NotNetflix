@@ -5,6 +5,7 @@ import 'package:not_netflix/services/api.dart';
 class APIService {
   final API api = API();
   final Dio dio = Dio();
+  String lanquage = 'fr-FR';
 
   Future<Response> getData(String path, {Map<String, dynamic>? params}) async {
     //  on construit ici l'url pour la requête
@@ -14,7 +15,7 @@ class APIService {
     //  ces paramètres seront présents dans chaques requêtes
     Map<String, dynamic> query = {
       'api_key': api.apiKey,
-      'language': 'fr-Fr',
+      'language': lanquage,
     };
 
     //  si params n'est pas null, on ajoute son contenu à query
@@ -124,6 +125,29 @@ class APIService {
           releaseDate: data['release_date'],
           vote: data['vote_average']);
       return newMovie;
+    } else {
+      throw (response);
+    }
+  }
+
+  Future<Movie> getMovieVideos({required movie}) async {
+    Response response = await getData('/movie/${movie.id}/videos');
+    Movie newMovie = handleGetMovieVideosResponse(response, movie);
+    if (newMovie.videos!.isEmpty) {
+      lanquage = 'en-US';
+      response = await getData('/movie/${movie.id}/videos');
+      newMovie = handleGetMovieVideosResponse(response, movie);
+    }
+    return newMovie;
+  }
+
+  Movie handleGetMovieVideosResponse(Response response, Movie movie) {
+    if (response.statusCode == 200) {
+      Map data = response.data;
+      List<String> videokeys = data['results'].map<String>((videoJson) {
+        return videoJson['key'] as String;
+      }).toList();
+      return movie.copyWith(videos: videokeys);
     } else {
       throw (response);
     }

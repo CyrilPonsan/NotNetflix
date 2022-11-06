@@ -5,19 +5,20 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:not_netflix/repositories/data_repository.dart';
 import 'package:not_netflix/ui/widgets/action_button.dart';
 import 'package:not_netflix/ui/widgets/movie_infos.dart';
+import 'package:not_netflix/ui/widgets/my_video_player.dart';
 import 'package:not_netflix/utils/constantes.dart';
 import 'package:provider/provider.dart';
 import '../../models/movie.dart';
 
-class MovieDtailsPage extends StatefulWidget {
+class MovieDetailsPage extends StatefulWidget {
   final Movie movie;
-  const MovieDtailsPage({super.key, required this.movie});
+  const MovieDetailsPage({super.key, required this.movie});
 
   @override
-  State<MovieDtailsPage> createState() => _MovieDtailsPageState();
+  State<MovieDetailsPage> createState() => _MovieDetailsPageState();
 }
 
-class _MovieDtailsPageState extends State<MovieDtailsPage> {
+class _MovieDetailsPageState extends State<MovieDetailsPage> {
   Movie? newMovie;
 
   @override
@@ -29,9 +30,10 @@ class _MovieDtailsPageState extends State<MovieDtailsPage> {
   void getMovieData() async {
     final dataProvider = Provider.of<DataRepository>(context, listen: false);
     //  récupérer les détails du film
-    Movie _movie = await dataProvider.getMovieDetails(movie: widget.movie);
+    Movie movie = await dataProvider.getMovieDetails(movie: widget.movie);
     setState(() {
-      newMovie = _movie;
+      newMovie = movie;
+      print(newMovie!.videos!);
     });
   }
 
@@ -52,10 +54,12 @@ class _MovieDtailsPageState extends State<MovieDtailsPage> {
             : Padding(
                 padding: const EdgeInsets.all(8),
                 child: ListView(children: [
-                  Container(
+                  SizedBox(
                     height: 220,
                     width: MediaQuery.of(context).size.width,
-                    color: Colors.red,
+                    child: newMovie!.videos!.isEmpty
+                        ? const Center()
+                        : MyVideoPlayer(movieId: newMovie!.videos!.first),
                   ),
                   MovieInfos(movie: newMovie!),
                   const SizedBox(
@@ -71,7 +75,7 @@ class _MovieDtailsPageState extends State<MovieDtailsPage> {
                   ),
                   ActionButton(
                       icon: Icons.download,
-                      label: 'Téléchargement',
+                      label: 'Télécharger la vidéo',
                       bgColor: Colors.grey.withOpacity(.3),
                       color: Colors.white)
                 ]),
