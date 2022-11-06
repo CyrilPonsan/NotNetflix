@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:not_netflix/models/movie.dart';
-import 'package:not_netflix/services/api_services.dart';
+import 'package:not_netflix/repositories/data_repository.dart';
+import 'package:not_netflix/ui/widgets/movie_card.dart';
+import 'package:not_netflix/ui/widgets/movie_category.dart';
 import 'package:not_netflix/utils/constantes.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,24 +14,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Movie>? movies;
-
   @override
   void initState() {
     super.initState();
-    getMovies();
-  }
-
-  void getMovies() {
-    APIService().getPopularMovies(pageNumber: 1).then((movieList) {
-      setState(() {
-        movies = movieList;
-      });
-    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final dataProvider = Provider.of<DataRepository>(context);
     return Scaffold(
       backgroundColor: kBackgroundColor,
       appBar: AppBar(
@@ -38,94 +30,44 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: ListView(
         children: [
-          Container(
-            height: 500,
-            child: movies == null
-                ? const Center()
-                : Image.network(
-                    movies![3].posterUrl(),
-                    fit: BoxFit.cover,
-                  ),
-          ),
-          const SizedBox(
-            height: 15,
-          ),
-          Text('Tendances actuelles',
-              style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold)),
-          const SizedBox(
-            height: 5,
-          ),
           SizedBox(
-            height: 160,
-            child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: 10,
-                itemBuilder: (context, index) {
-                  // ignore: dead_code
-                  return Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      width: 110,
-                      child: movies == null
-                          ? const Center()
-                          : Image.network(
-                              movies![index].posterUrl(),
-                              fit: BoxFit.cover,
-                            ));
-                }),
+              height: 500,
+              child: MovieCard(
+                movie: dataProvider.popularMovieList.first,
+              )),
+          MovieCategory(
+            label: 'Tendances Actuelles',
+            movieList: dataProvider.popularMovieList,
+            imageHeight: 160,
+            imageWidth: 110,
+            callback: dataProvider.getPopularMovies,
           ),
-          const SizedBox(
-            height: 15,
+          MovieCategory(
+            label: "Actuellement au cinéma",
+            movieList: dataProvider.nowPlaying,
+            imageHeight: 320,
+            imageWidth: 220,
+            callback: dataProvider.getNowPlaying,
           ),
-          Text('Actuellement au cinéma',
-              style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold)),
-          const SizedBox(
-            height: 5,
+          MovieCategory(
+            label: 'Ils arrivent bientôt',
+            movieList: dataProvider.upcomingMovies,
+            imageHeight: 160,
+            imageWidth: 110,
+            callback: dataProvider.getUpcomingMovies,
           ),
-          SizedBox(
-            height: 320,
-            child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: 10,
-                itemBuilder: (context, index) {
-                  return Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    width: 220,
-                    color: Colors.blue,
-                    child: Center(child: Text(index.toString())),
-                  );
-                }),
-          ),
-          const SizedBox(
-            height: 15,
-          ),
-          Text('Ils arrivent bientôt',
-              style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold)),
-          const SizedBox(
-            height: 5,
-          ),
-          SizedBox(
-            height: 160,
-            child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: 10,
-                itemBuilder: (context, index) {
-                  return Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    width: 110,
-                    color: Colors.green,
-                    child: Center(child: Text(index.toString())),
-                  );
-                }),
-          ),
+          MovieCategory(
+              label: 'Animations',
+              movieList: dataProvider.animationMovies,
+              imageHeight: 120,
+              imageWidth: 110,
+              callback: dataProvider.getAnimationMovies),
+          MovieCategory(
+              label: 'Science-Fiction',
+              movieList: dataProvider.sfMovies,
+              imageHeight: 120,
+              imageWidth: 110,
+              callback: dataProvider.getSFMovies),
         ],
       ),
     );
